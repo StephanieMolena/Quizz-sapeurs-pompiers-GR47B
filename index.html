@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz Sapeurs-Pompiers — GR47B</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f0; color: #1a1a18; min-height: 100vh; padding: 1rem; }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 1.5rem 0; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .badge { display: inline-block; background: #dbeafe; color: #1d4ed8; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 6px; margin-bottom: .75rem; letter-spacing: .02em; }
+  h1 { font-size: 22px; font-weight: 600; margin-bottom: .5rem; }
+  h2 { font-size: 18px; font-weight: 600; margin-bottom: 1rem; }
+  p { font-size: 15px; color: #555; line-height: 1.6; margin-bottom: .75rem; }
+  .card { background: #fff; border: 1px solid #e5e5e0; border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
+  label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 5px; }
+  input[type=text], input[type=email] { width: 100%; padding: 9px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; transition: border-color .15s; }
+  input:focus { border-color: #3b82f6; }
+  .field-group { margin-bottom: 1rem; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 20px; border-radius: 8px; border: 1px solid #ccc; background: #fff; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .15s; }
+  .btn:hover { background: #f5f5f0; }
+  .btn-primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+  .btn-primary:hover { background: #1d4ed8; }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+  .pbar { height: 5px; background: #e5e5e0; border-radius: 3px; margin-bottom: 1.5rem; overflow: hidden; }
+  .pfill { height: 100%; background: #2563eb; border-radius: 3px; transition: width .3s; }
+  .qcount { font-size: 13px; color: #999; margin-bottom: .4rem; }
+  .qtopic { display: inline-block; background: #dbeafe; color: #1d4ed8; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 6px; margin-bottom: .75rem; }
+  .qtext { font-size: 16px; font-weight: 600; color: #1a1a18; margin-bottom: 1.25rem; line-height: 1.5; }
+  .opts { display: flex; flex-direction: column; gap: 8px; }
+  .opt { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: #fff; border: 1px solid #ddd; border-radius: 8px; cursor: pointer; text-align: left; font-size: 14px; color: #1a1a18; transition: all .15s; }
+  .opt:hover:not(:disabled) { background: #f5f5f0; border-color: #bbb; }
+  .opt.correct { border-color: #16a34a; background: #f0fdf4; color: #15803d; }
+  .opt.wrong { border-color: #dc2626; background: #fef2f2; color: #dc2626; }
+  .opt:disabled { cursor: default; }
+  .oletter { width: 28px; height: 28px; border-radius: 50%; background: #f0f0ec; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+  .expl { margin-top: 1rem; padding: 12px 16px; background: #eff6ff; border-left: 4px solid #3b82f6; border-radius: 0 8px 8px 0; font-size: 13px; color: #374151; line-height: 1.65; display: none; }
+  .navrow { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; }
+  .score-circle { width: 110px; height: 110px; border-radius: 50%; border: 3px solid #ccc; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+  .resrow { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+  .resrow:last-child { border-bottom: none; }
+  .ttag { font-size: 11px; color: #999; margin-top: 2px; }
+  .mailto-link { display: inline-flex; align-items: center; gap: 8px; margin-top: .75rem; padding: 8px 16px; background: #2563eb; color: #fff; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; }
+  .mailto-link:hover { background: #1d4ed8; }
+  @media print { .btn, .navrow .btn { display: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- START -->
+<div id="s-start" class="screen active">
+  <div style="margin-bottom:1.5rem">
+    <div class="badge">GR 47B — Quiz opérationnel</div>
+    <h1>Quiz Sapeurs-Pompiers</h1>
+    <p>30 questions sur les règles de sécurité, le matériel et les procédures opérationnelles. La bonne réponse et une explication s'affichent après chaque question.</p>
+  </div>
+  <div class="card">
+    <div class="field-group"><label>Prénom et nom</label><input type="text" id="inp-name" placeholder="Ex : Martin Dupont" /></div>
+    <div class="field-group" style="margin-bottom:0"><label>Ton adresse email (pour recevoir tes résultats)</label><input type="email" id="inp-email" placeholder="ton.email@exemple.ch" /></div>
+  </div>
+  <p style="font-size:13px;color:#999">À la fin, un bouton te permet d'envoyer tes résultats par email à la formatrice.</p>
+  <div style="margin-top:1rem"><button class="btn btn-primary" onclick="startQ()">Commencer ▶</button></div>
+</div>
+
+<!-- QUIZ -->
+<div id="s-quiz" class="screen">
+  <div class="pbar"><div class="pfill" id="pfill"></div></div>
+  <div class="qcount" id="qcount"></div>
+  <div class="qtopic" id="qtopic"></div>
+  <div class="qtext" id="qtext"></div>
+  <div class="opts" id="qopts"></div>
+  <div class="expl" id="qexpl"></div>
+  <div class="navrow">
+    <span id="qfb" style="font-size:13px;font-weight:600"></span>
+    <button class="btn btn-primary" id="btn-next" onclick="nextQ()" disabled>Suivant ▶</button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="s-result" class="screen">
+  <div class="badge">Résultats</div>
+  <h2 id="res-title"></h2>
+  <div id="res-circle" class="score-circle">
+    <span style="font-size:30px;font-weight:700" id="res-num"></span>
+    <span style="font-size:14px;color:#999" id="res-pct"></span>
+  </div>
+  <p id="res-comment" style="text-align:center;margin-bottom:1.5rem;font-weight:600"></p>
+  <div class="card" id="res-mailto-card">
+    <p style="font-size:14px;font-weight:600;margin-bottom:.25rem">Envoyer les résultats à la formatrice</p>
+    <p style="font-size:13px;color:#999;margin-bottom:0">Clique sur le bouton — ton client email s'ouvre avec les résultats prêts à envoyer.</p>
+    <a id="mailto-btn" class="mailto-link" href="#">✉ Envoyer mes résultats</a>
+  </div>
+  <div class="card">
+    <p style="font-size:13px;font-weight:600;color:#555;margin-bottom:.75rem">Détail question par question</p>
+    <div id="res-detail"></div>
+  </div>
+  <div style="margin-top:1rem;display:flex;gap:8px">
+    <button class="btn" onclick="resetQ()">↺ Recommencer</button>
+    <button class="btn" onclick="window.print()">🖨 Imprimer</button>
+  </div>
+</div>
+
+</div>
+<script>
+const QS=[
+  {t:"Désincarcération — règle AIRBAG",q:"Dans la règle AIRBAG, quelle est la distance minimale à maintenir par rapport à l'airbag conducteur ?",o:["30 cm","60 cm","90 cm","45 cm"],c:1,e:"Règle AIRBAG : 30 cm de la tête/airbag latéral, 60 cm de l'airbag conducteur, 90 cm de l'airbag passager."},
+  {t:"Désincarcération — règle AIRBAG",q:"Dans la règle AIRBAG, quelle est la distance à respecter face à l'airbag passager avant ?",o:["30 cm","45 cm","60 cm","90 cm"],c:3,e:"90 cm est la distance minimale pour l'airbag passager avant — c'est le plus puissant et donc le plus dangereux."},
+  {t:"Désincarcération — règle CARS",q:"Que signifie le « S » dans la règle CARS lors d'une intervention de désincarcération ?",o:["Stabilisation du véhicule","Soubassement","Sécurité active","Système de freinage"],c:1,e:"CARS = Carburant / Autocollants / Remplissage / Soubassement. Le soubassement révèle : pot d'échappement, réservoir, câble orange (hybride/électrique)."},
+  {t:"Désincarcération — sauvetage axé patient",q:"Pour un patient en état « critique », quel est le temps disponible pour la désincarcération selon le principe du sauvetage axé sur le patient ?",o:["Immédiat — quelques minutes","Moins de 20 minutes","Entre 20 et 30 minutes","Plus de 30 minutes"],c:1,e:"Sauvetage axé patient : Danger de mort imminente = immédiat ; État critique = moins de 20 min (rapide) ; État stable = plus de 20 min (avec ménagement)."},
+  {t:"Désincarcération — équipes",q:"Lors d'une désincarcération à 7 postes, quelles sont les deux fonctions des équipes ?",o:["Attaque et Sécurité","Sécurité et Front","Front et Médical","Avant et Arrière"],c:1,e:"Structure à 7 postes : équipe « Sécurité » (AIRBAG, immobilisation, batterie) et équipe « Front » (désincarcération, création d'espace)."},
+  {t:"Conduite d'intervention — CADAC",q:"Que signifie l'acronyme CADAC dans la conduite d'intervention ?",o:["Contrôler, Analyser, Décider, Agir, Communiquer","Constater, Apprécier, Décider, Agir, Contrôler","Commander, Apprécier, Diriger, Alerter, Contrôler","Constater, Analyser, Décider, Appliquer, Confirmer"],c:1,e:"CADAC = Constater / Apprécier / Décider / Agir / Contrôler. C'est le cycle de conduite du règlement CSSP, applicable en continu."},
+  {t:"Conduite d'intervention — bâtiments",q:"Selon le règlement CI, les voies d'évacuation d'un bâtiment servent à quelle double fonction pour les SP ?",o:["Chemin de fuite ET axe d'attaque","Périmètre de sécurité ET zone de regroupement","Accès matériel ET zone médicale","Évacuation des victimes ET point de commandement"],c:0,e:"Les voies d'évacuation sont le chemin de fuite des occupants ET l'axe d'attaque des SP — le chemin le plus court et le plus sûr vers l'extérieur."},
+  {t:"Feu de parking souterrain",q:"Lors d'un feu de parking souterrain, quelle est la PREMIÈRE priorité du chef d'intervention ?",o:["Extinction immédiate du foyer","Mise en place de la ventilation","Prise d'information (plan, centrale détection, responsable technique)","Sauvetage des personnes signalées"],c:2,e:"Priorités CI parking souterrain : 1) Prise d'info, 2) Sauvetage (si signalés), 3) Reconnaissance, 4) Ventilation, 5) Extinction. La localisation du foyer est primordiale."},
+  {t:"ABC — protection personnelle",q:"Que signifie l'acronyme PPPP en matière de protection ABC ?",o:["Protection, Périmètre, Planification, Prévention","Protection respiratoire, Prendre ses distances, Présence temporelle réduite, Protection (place à couvert)","Périmètre, Personnel, Produit, Procédure","Prévenir, Protéger, Prendre en charge, Prévenir"],c:1,e:"PPPP = Protection respiratoire / Prendre ses distances / Présence temporelle réduite / Protection à distance (place à couvert). Les 4 principes de base face à un danger ABC."},
+  {t:"ABC — procédure IASI",q:"En cas d'événement ABC, quelle est la séquence de la règle IASI ?",o:["Intervenir, Alerter, Sauver, Isoler","Identifier le danger / Assurer les zones / Sauver personnes & animaux / Impliquer les spécialistes","Informer, Analyser, Sécuriser, Intervenir","Isoler, Alerter, Secourir, Impliquer"],c:1,e:"IASI = Identifier le danger / Assurer les zones, barrer / Sauver les personnes et animaux / Impliquer les spécialistes. Procédure de base ABC (chap. 12 règlement de base)."},
+  {t:"ABC — définition",q:"Dans l'acronyme ABC (risques), que signifie la lettre « B » ?",o:["Balistique","Biologique","Bactériologique","Biochimique"],c:2,e:"ABC = Atomique (ou radiologique) / Bactériologique / Chimique. Le terme exact selon le règlement CSSP est « Bactériologique »."},
+  {t:"Fumées — COMIX",q:"Que représente le « O » dans l'acronyme COMIX décrivant les caractéristiques des fumées ?",o:["Oxygène","Opacité","Odeur","Oxyde de carbone"],c:1,e:"COMIX = Chaleur / Opacité / Mobilité / Inflammabilité / Toxicité. L'opacité peut supprimer totalement la visibilité et désorienter victimes et sauveteurs."},
+  {t:"Sécurité équipes — SSL",q:"Que signifie le système de sécurité SSL utilisé lors des engagements sous protection respiratoire ?",o:["Signalisation, Sécurité, Liaison","Sécurité, Surveillance, Liaison","Soutien, Secours, Liaison","Sécurité, Soutien, Local"],c:1,e:"SSL = Sécurité / Surveillance / Liaison. Ce système garantit la sécurité des équipes en atmosphère viciée."},
+  {t:"Sécurité équipes — ARE",q:"Que signifie la règle ARE pour les porteurs de protection respiratoire ?",o:["Alarme, Retraite, Équipe","Approche, Repli, Équipe","Alerte, Réserve, Emplacement","Attaque, Retrait, Évaluation"],c:1,e:"ARE = Approche / Repli / Équipe. Elle régit l'engagement et la retraite des porteurs de PR — on travaille toujours en binôme minimum."},
+  {t:"Ventilation opérationnelle",q:"Quels sont les 3 objectifs principaux de la ventilation opérationnelle ?",o:["Chauffer, Éclairer, Ventiler","Protéger, Désenfumer, Attaquer","Isoler, Neutraliser, Évacuer","Détecter, Analyser, Intervenir"],c:1,e:"Ventilation opérationnelle : protéger (empêcher la propagation), désenfumer (évacuer les fumées d'un volume non concerné), attaquer (agir sur les fumées et le foyer)."},
+  {t:"Conduites — règle de sécurité",q:"Lors du déploiement des conduites, quelle est la prescription concernant les 3 mètres avant la division ?",o:["Les 3 m avant la division doivent être en pente","Les 3 m avant la division doivent être rectilignes","Les 3 m avant la division doivent être fixés au sol","Les 3 m avant la division doivent être enroulés"],c:1,e:"Prescription : Les 3 m avant la division doivent être rectilignes. Ne pas vriller les conduites lors du déploiement, et maintenir la division au sol lors de la mise sous pression."},
+  {t:"Conduites — diamètres",q:"Quel diamètre a la conduite de refoulement utilisée pour l'extinction ou le refroidissement de structures ?",o:["20 mm","40 ou 55 mm","75 mm","110 mm"],c:1,e:"La conduite de refoulement (de la division jusqu'à la lance) a un diamètre de 40 mm ou 55 mm. La conduite de transport extérieur est à 75 mm, l'aspiration à 110 mm."},
+  {t:"Conduites — diamètres",q:"Pour alimenter une tonne-pompe depuis une borne hydrante, quelle conduite utilise-t-on et quel est son diamètre ?",o:["Conduite de refoulement — 40 mm","Conduite d'alimentation — 75 mm","Conduite d'aspiration — 110 mm","Conduite de transport — 55 mm"],c:1,e:"La conduite d'alimentation (75 mm) permet d'alimenter une tonne-pompe depuis une borne hydrante. La conduite d'aspiration (110 mm) est utilisée depuis une rivière, un lac ou un bassin."},
+  {t:"Fermentation fourrage — types d'engagement",q:"Combien de types d'engagement existent lors d'une intervention fermentation de fourrage, et lequel s'applique si T > 50°C ?",o:["3 types — extraction des gaz","4 types — extraction des gaz (T > 50°C)","4 types — ventilation du tas (T > 50°C)","2 types — détassage uniquement"],c:1,e:"Il y a 4 types d'engagement : 1) Mesurer la température ; 2) Extraire les gaz (T > 50°C) ; 3) Ventiler le tas (T < 50°C) ; 4) Détassage."},
+  {t:"Fermentation fourrage — mesures personnelles",q:"Quels équipements de protection personnelle sont obligatoires lors d'une intervention fermentation de fourrage ?",o:["Tenue légère et lunettes de protection","Protection respiratoire (PR), masques à poussières + appareil multigaz","Tenue lourde ABC","Casque de chantier et visière"],c:1,e:"Mesures personnelles obligatoires : Protection respiratoire (PR), masques à poussières, appareil de mesure multigaz. Lances eau 55 mm prêtes en protection. Engagement minimum sur les tas."},
+  {t:"Fermentation fourrage — danger détuilage",q:"Pourquoi faut-il détuiler lors d'une intervention sur un tas de fourrage en fermentation ?",o:["Pour laisser entrer la pluie et refroidir le fourrage","Pour éviter l'accumulation de gaz inflammables sous le toit pouvant mener à un embrasement","Pour faciliter l'accès des SP au faîte","Pour contrôler visuellement le foyer"],c:1,e:"Le détuilage est impératif pour éviter l'accumulation de gaz inflammables sous le toit, ce qui pourrait provoquer un embrasement généralisé soudain."},
+  {t:"Ferroviaire — règle d'or",q:"Quelle est la règle absolue pour les SP (non BDS-ferroviaire) concernant la zone dangereuse ferroviaire ?",o:["Les SP peuvent entrer dans la zone dangereuse après évaluation","Aucun SP ne se tient dans la zone dangereuse sans ordre explicite de la BDS-ferroviaire","Les SP entrent dès l'arrêt visible du trafic","Les SP peuvent entrer dès que la signalisation est mise en place"],c:1,e:"Règle absolue : Aucun SP ne se tient sur les voies ou dans la zone dangereuse sans ordre EXPLICITE de la BDS-ferroviaire. Des dangers permanents subsistent même après arrêt de l'exploitation."},
+  {t:"Ferroviaire — électricité",q:"À quelle tension sont les lignes de contact ferroviaires, et quel danger représentent-elles ?",o:["220 V — tension domestique","3 000 V — tension DC","Souvent 15 000 V — risque mortel, même en cas de ligne rompue","1 500 V — uniquement sur TGV"],c:2,e:"Les lignes de contact sont souvent sous 15 000 V. Des lignes rompues peuvent encore être sous tension. Toucher ou s'approcher est potentiellement MORTEL."},
+  {t:"Ferroviaire — tâches SP",q:"Quelle est la 1ère tâche des SP (non BDS-ferroviaire) lors d'un événement sur installation ferroviaire ?",o:["Entrer dans la zone dangereuse pour sécuriser","Alerter la BDS-ferroviaire concernée via le CEA de la police cantonale fribourgeoise","Mettre en place le rideau d'eau","Couper l'alimentation électrique"],c:1,e:"1ère tâche : Alerter la BDS-ferroviaire concernée (via le CEA de la police cantonale fribourgeoise). Ensuite : prise de contact avec la BDS-ferroviaire, sécurisation globale, soutien des auto-sauvetages HORS de la zone dangereuse."},
+  {t:"Polycom — bouton SOS",q:"Que se passe-t-il si un sapeur-pompier appuie sur le bouton SOS (orange) de son Polycom TPH900 ?",o:["Le terminal s'éteint par sécurité","Déclenchement d'une alarme au CEA + ouverture automatique du micro + procédure stricte","Un SMS est envoyé au CI","La radio passe sur le canal d'urgence uniquement"],c:1,e:"Appui sur le bouton SOS (orange) : alarme immédiate au CEA, procédure stricte enclenchée, ouverture automatique du micro. L'appel est transmis au commandant et à l'ECAB."},
+  {t:"Polycom — usage opérationnel",q:"À qui est principalement destinée la radio Polycom lors d'une intervention ?",o:["À tous les sapeurs-pompiers sans distinction","Au CI, à la centrale et aux chefs de secteur (conduite d'intervention)","Uniquement aux équipes ABC","À l'équipe de désincarcération"],c:1,e:"Les Polycom sont prévus pour la CONDUITE d'intervention : CI, centrale et chefs de secteur. Le CI prend 1 radio analogique ET 1 Polycom lors de chaque intervention."},
+  {t:"Silos à pellets — danger CO",q:"Avant de pénétrer dans un local de stockage de pellets, quelle mesure de sécurité est impérative ?",o:["Porter uniquement un masque à poussières","Mesurer le taux de monoxyde de carbone (CO) avec un appareil calibré","Ouvrir toutes les fenêtres puis attendre 5 minutes","Appeler le fabricant de la chaudière"],c:1,e:"Avant toute entrée dans un silo à pellets : couper la chaudière, ventiler 15 minutes, mesurer le CO avec un appareil calibré. Une deuxième personne reste à l'extérieur pour donner l'alarme (jamais pour porter secours directement)."},
+  {t:"Ascenseur — mode pompiers",q:"Lors de l'utilisation d'un ascenseur en mode « dérogation pompiers », que se passe-t-il à l'étage de destination ?",o:["L'ascenseur redescend automatiquement au rez","L'ascenseur reste avec les portes ouvertes tant que le mode pompiers est activé","L'ascenseur est bloqué et inutilisable","Les portes s'ouvrent 30 secondes puis se referment"],c:1,e:"En mode dérogation pompiers, l'ascenseur garde ses portes ouvertes à destination tant que le mode est activé. Positionner un personnel devant la cabine pour éviter son utilisation par d'autres."},
+  {t:"Ascenseur — mode pompiers",q:"Après avoir évacué des personnes d'un ascenseur, que ne doit-on JAMAIS faire ?",o:["Refermer les portes palières","Rétablir le courant de traction","Laisser l'ascenseur en mode pompiers","Consigner l'intervention"],c:1,e:"Après évacuation : 1) Refermer les portes palières. 2) NE JAMAIS rétablir le courant de traction. Règle absolue de sécurité."},
+  {t:"Conduite d'intervention — ODISSE",q:"Que signifie la règle ODISSE avant la pose d'une échelle ?",o:["Objectif, Direction, Installation, Sécurité, Stabilité, Exécution","Obstacles, Distances, Sol, Sécurité","Ouverture, Distance, Inclinaison, Stabilité, Sortie, Équipe","Observation, Décision, Installation, Sécurité, Support, Exécution"],c:1,e:"ODISSE = Obstacles / Distances / Sol / Sécurité. Règle standard (chap. 5.12.1 règlement de base) à vérifier systématiquement avant toute pose d'échelle."}
+];
+
+let cur=0,ans=[],uName="",uEmail="",done=false;
+
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active')}
+function startQ(){
+  uName=document.getElementById('inp-name').value.trim();
+  uEmail=document.getElementById('inp-email').value.trim();
+  if(!uName){alert('Merci d\'entrer ton prénom et nom.');return}
+  cur=0;ans=[];renderQ();show('s-quiz');
+}
+function renderQ(){
+  const q=QS[cur];done=false;
+  document.getElementById('qcount').textContent='Question '+(cur+1)+' / '+QS.length;
+  document.getElementById('qtopic').textContent=q.t;
+  document.getElementById('qtext').textContent=q.q;
+  document.getElementById('pfill').style.width=((cur/QS.length)*100)+'%';
+  const ex=document.getElementById('qexpl');ex.style.display='none';ex.textContent='';
+  document.getElementById('qfb').textContent='';
+  document.getElementById('btn-next').disabled=true;
+  const L=['A','B','C','D'];
+  const el=document.getElementById('qopts');el.innerHTML='';
+  q.o.forEach(function(o,i){
+    const b=document.createElement('button');
+    b.className='opt';
+    b.innerHTML='<span class="oletter">'+L[i]+'</span><span>'+o+'</span>';
+    b.onclick=function(){pick(i)};
+    el.appendChild(b);
+  });
+}
+function pick(idx){
+  if(done)return;done=true;
+  const q=QS[cur];
+  const btns=document.querySelectorAll('.opt');
+  btns.forEach(function(b){b.disabled=true});
+  const ok=idx===q.c;
+  btns[idx].classList.add(ok?'correct':'wrong');
+  if(!ok)btns[q.c].classList.add('correct');
+  ans.push({q:cur,chosen:idx,correct:ok});
+  const fb=document.getElementById('qfb');
+  fb.textContent=ok?'✓ Bonne réponse !':'✗ Réponse incorrecte';
+  fb.style.color=ok?'#15803d':'#dc2626';
+  const ex=document.getElementById('qexpl');
+  ex.textContent=q.e;ex.style.display='block';
+  document.getElementById('btn-next').disabled=false;
+}
+function nextQ(){cur++;if(cur>=QS.length){showRes()}else{renderQ()}}
+function showRes(){
+  const sc=ans.filter(function(a){return a.correct}).length;
+  const pct=Math.round((sc/QS.length)*100);
+  document.getElementById('res-title').textContent='Résultats de '+uName;
+  document.getElementById('res-num').textContent=sc+'/'+QS.length;
+  document.getElementById('res-pct').textContent=pct+'%';
+  const circ=document.getElementById('res-circle');
+  const numEl=document.getElementById('res-num');
+  const col=pct>=70?'#16a34a':pct>=50?'#d97706':'#dc2626';
+  circ.style.borderColor=col;numEl.style.color=col;
+  let cmt='';
+  if(pct===100)cmt='Parfait ! Niveau exemplaire.';
+  else if(pct>=80)cmt='Très bon résultat ! Quelques points à peaufiner.';
+  else if(pct>=60)cmt='Bon niveau. Des révisions ciblées s\'imposent.';
+  else cmt='Des lacunes importantes — une révision approfondie est recommandée.';
+  document.getElementById('res-comment').textContent=cmt;
+  // Build mailto
+  let lines='QUIZ SP GR47B\n'+'='.repeat(40)+'\n';
+  lines+='Participant : '+uName+'\n';
+  if(uEmail)lines+='Email       : '+uEmail+'\n';
+  lines+='Date        : '+new Date().toLocaleString('fr-CH')+'\n';
+  lines+='Score       : '+sc+'/'+QS.length+' ('+pct+'%)\n';
+  lines+='='.repeat(40)+'\n\n';
+  QS.forEach(function(q,i){
+    const a=ans[i];
+    lines+=(a.correct?'✓ ':'✗ ')+'Q'+(i+1)+'. ['+q.t+']\n';
+    lines+=q.q+'\n';
+    lines+='   Réponse donnée : '+q.o[a.chosen]+'\n';
+    if(!a.correct)lines+='   ➜ Bonne réponse : '+q.o[q.c]+'\n';
+    lines+='\n';
+  });
+  const subj=encodeURIComponent('Quiz SP GR47B — '+uName+' — '+sc+'/'+QS.length+' ('+pct+'%)');
+  const body=encodeURIComponent(lines);
+  const ml=document.getElementById('mailto-btn');
+  ml.href='mailto:steph.molena@bluewin.ch?subject='+subj+'&body='+body;
+  // Detail
+  const det=document.getElementById('res-detail');det.innerHTML='';
+  QS.forEach(function(q,i){
+    const a=ans[i];
+    const r=document.createElement('div');r.className='resrow';
+    r.innerHTML='<span style="color:'+(a.correct?'#16a34a':'#dc2626')+';flex-shrink:0;font-size:16px">'+(a.correct?'✓':'✗')+'</span>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:13px;color:#1a1a18;line-height:1.4">'+q.q.substring(0,90)+(q.q.length>90?'…':'')+'</div>'
+      +'<div class="ttag">'+q.t+'</div>'
+      +(!a.correct?'<div style="font-size:12px;color:#999;margin-top:2px">Bonne réponse : '+q.o[q.c]+'</div>':'')
+      +'</div>';
+    det.appendChild(r);
+  });
+  show('s-result');
+}
+function resetQ(){document.getElementById('inp-name').value='';document.getElementById('inp-email').value='';show('s-start')}
+</script>
+</body>
+</html>
